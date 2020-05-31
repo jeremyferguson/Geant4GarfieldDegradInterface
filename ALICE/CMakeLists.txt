@@ -18,6 +18,7 @@ endif()
 #----------------------------------------------------------------------------
 # Setup include directory for this project
 #
+message(${Geant4_USE_FILE})
 include(${Geant4_USE_FILE})
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 #----------------------------------------------------------------------------
@@ -35,6 +36,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Setup GARFIELD++ include directories
 include_directories($ENV{GARFIELD_HOME}/Include)
 include_directories($ENV{GARFIELD_HOME}/Heed)
+include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
 # Add additional libraries needed for GARFIELD++
 link_directories($ENV{GARFIELD_LIB})
 IF(APPLE)
@@ -62,7 +64,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 add_executable(ALICE ALICE.cc ${sources} ${headers})
-target_link_libraries(ALICE -lGarfield -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
+find_library(GARFIELD_LIBRARY Garfield HINTS ${GARFIELD_HOME})
+target_link_libraries(ALICE ${GARFIELD_LIBRARY} -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B1. This is so that we can run the executable directly because it
@@ -86,4 +89,5 @@ endforeach()
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
+set(CMAKE_BUILD_TYPE Debug)
 install(TARGETS ALICE DESTINATION bin)

@@ -49,10 +49,12 @@ class DriftLineTrajectory : public G4Trajectory
 
     DriftLineTrajectory();
     DriftLineTrajectory(DriftLineTrajectory &);
+    DriftLineTrajectory(const G4Track* aTrack);
     virtual ~DriftLineTrajectory();
     virtual void AppendStep(const G4Step* aStep){}; 
     void AppendStep(G4ThreeVector pos, G4double t);
     inline void* operator new(size_t);
+    virtual void MergeTrajectory(G4VTrajectory* secondTrajectory);
     inline void  operator delete(void*);
     inline int operator == (const DriftLineTrajectory& right) const
      { return (this==&right); }
@@ -64,6 +66,7 @@ class DriftLineTrajectory : public G4Trajectory
    { return +2.*eplus; }
   private:
     DriftLineTrajectoryPointContainer* fpPointsContainer;
+
 };
 
 extern G4ThreadLocal G4Allocator<DriftLineTrajectory>* DriftLineTrajectoryAllocator;

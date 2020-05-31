@@ -52,6 +52,10 @@ DriftLineTrajectoryPoint::DriftLineTrajectoryPoint(G4ThreeVector pos, G4double t
       : G4TrajectoryPoint(pos), fTime(t){}
 
 
+DriftLineTrajectoryPoint::DriftLineTrajectoryPoint(const G4Track* aTrack)
+    : G4TrajectoryPoint(aTrack->GetPosition())
+{
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

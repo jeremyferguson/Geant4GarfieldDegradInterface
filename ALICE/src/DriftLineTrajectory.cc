@@ -45,6 +45,12 @@ DriftLineTrajectory::DriftLineTrajectory()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
+DriftLineTrajectory::DriftLineTrajectory(const G4Track* aTrack)
+{
+    fpPointsContainer = new DriftLineTrajectoryPointContainer();
+    // Following is for the first trajectory point
+    fpPointsContainer->push_back(new DriftLineTrajectoryPoint(aTrack));
+}
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DriftLineTrajectory::DriftLineTrajectory(DriftLineTrajectory &right)
@@ -69,7 +75,21 @@ DriftLineTrajectory::~DriftLineTrajectory() {
 	delete fpPointsContainer;
 }
 
-
+void DriftLineTrajectory::MergeTrajectory(G4VTrajectory* secondTrajectory)
+{
+    if(!secondTrajectory) return;
+    DriftLineTrajectory* second = dynamic_cast<DriftLineTrajectory*>(secondTrajectory);
+    G4int ent = second->GetPointEntries();
+    // initial point of the second trajectory should not be merged
+    for(G4int i=1; i<ent; ++i) {
+        fpPointsContainer->push_back((*(second->fpPointsContainer))[i]);
+    }
+    if (second->fpPointsContainer->size() != 0) {
+    	delete (*second->fpPointsContainer)[0];
+    }
+    second->fpPointsContainer->clear();
+}
+    
 void DriftLineTrajectory::AppendStep(G4ThreeVector pos, G4double t){
 		fpPointsContainer->push_back(new DriftLineTrajectoryPoint(pos,t));
 }

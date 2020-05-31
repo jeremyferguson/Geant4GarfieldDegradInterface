@@ -6,6 +6,7 @@
 #include "G4SDManager.hh"
 #include "GasBoxSD.hh"
 #include "SteppingAction.hh"
+#include "MyTrackingAction.hh"
 
 MyUserActionInitialization::MyUserActionInitialization(){}
 
@@ -19,6 +20,8 @@ void MyUserActionInitialization::Build() const {
 	EventAction* evt = new EventAction();
 	SetUserAction(evt);
 	SetUserAction(new RunAction());
+	MyTrackingAction* trk = new MyTrackingAction();
+	SetUserAction(trk);
 }
 
 void MyUserActionInitialization::BuildForMaster() const {

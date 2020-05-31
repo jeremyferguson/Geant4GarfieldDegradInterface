@@ -58,6 +58,7 @@ class DriftLineTrajectoryPoint : public G4TrajectoryPoint {
     DriftLineTrajectoryPoint();
     DriftLineTrajectoryPoint(G4ThreeVector, G4double);
     DriftLineTrajectoryPoint(const DriftLineTrajectoryPoint &right);
+    DriftLineTrajectoryPoint(const G4Track* );
     virtual ~DriftLineTrajectoryPoint();
 
 // Operators
