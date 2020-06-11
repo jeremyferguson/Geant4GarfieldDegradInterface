@@ -93,10 +93,11 @@ void XenonHit::Draw()
     G4Circle circle(fPos);
     circle.SetScreenSize(1.);
     circle.SetFillStyle(G4Circle::filled);
-    G4Colour colour(1.,0.,0.);
+    G4Colour colour(0.,0.,1.);
     G4VisAttributes attribs(colour);
     circle.SetVisAttributes(attribs);
     pVVisManager->Draw(circle);
+    //G4cout << "Drawing Xenon hit " <<G4endl;
   }
 }
 

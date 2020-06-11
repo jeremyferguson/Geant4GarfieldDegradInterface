@@ -53,13 +53,13 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-        G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+        G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
         const std::string degradpath = std::getenv("DEGRAD_HOME");
         G4cout << degradpath << G4endl;
-        std::string exec = "/Degrad < conditions_Degrad.txt";
+        std::string exec = "/degrad < conditions_Degrad.txt";
         std::string full_path = degradpath + exec;
         const char *mychar = full_path.c_str();
         G4cout << mychar << G4endl;
@@ -74,7 +74,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
 
 void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degradPos,G4double degradTime)
 {
-    G4int eventNumber,Nep, nline, i, electronNumber; //Nep é o numero de e primarios que corresponde ao que o biagi chama de "ELECTRON CLUSTER SIZE (NCLUS)"
+    G4int eventNumber,Nep, nline, i, electronNumber; //Nep is the number of primaries that corresponds to what the biagi calls "ELECTRON CLUSTER SIZE (NCLUS)"
     G4double posX,posY,posZ,time,n;
     G4double  posXDegrad,posYDegrad,posZDegrad,timeDegrad;
     G4double  posXInitial=degradPos.getX();
@@ -92,14 +92,14 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
     
     nline=1;
     electronNumber=0;
-    while (getline(inFile, line,'\n'))//o '\n' indica o caracter para delimitaro fim de linha
-    {
-        std::istringstream iss(line);//stream de strings
+    while (getline(inFile, line,'\n'))//o '\n' indicates the character to delimit the end of line   
+    { 
+        std::istringstream iss(line);//stream of  strings
         if (nline ==1) //resumo
         {
-            while (iss >> n) //cada stream ira atribuir o valor a n
-            {
-                v.push_back(n); //o n é adicionado ao vector
+            while (iss >> n) //  each stream will assign the value to n         
+	    {
+                v.push_back(n); //the n is added to the vector
             }
             
             eventNumber=v[0];
@@ -107,56 +107,75 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
             //                            Nexc=v[2];
             v.clear();
         }
-        if (nline ==2) //Ionizations
+        if (nline ==2 || nline == 3) //Ionizations
         {
-            while (iss >> n) //cada stream ira atribuir o valor a n
+            while (iss >> n) //each stream will assign the value to n
             {
-                v.push_back(n); //o n é adicionado ao vector
+                v.push_back(n); //the n is added to the vector
             }
-            for (i=0;i<v.size();i=i+7){
-                posXDegrad=v[i];
-                posYDegrad=v[i+1];
-                posZDegrad=v[i+2];
-                timeDegrad=v[i+3];
-                //convert from um to mm in GEANT4
-                //also Y and Z axes are swaped in GEANT4 and Garfield++ relatively to Degrad
-                posX=posXDegrad*0.001+posXInitial;
-                posY=posZDegrad*0.001+posYInitial;
-                posZ=posYDegrad*0.001+posZInitial;
-                //convert ps to ns
-                time=timeDegrad*0.001+timeInitial;
-                
-                
-                G4ThreeVector myPoint;
-                myPoint.setX(posX);
-                myPoint.setY(posY);
-                myPoint.setZ(posZ);
-                
-                //Check in which Physical volume the point bellongs
-                G4Navigator* theNavigator= G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
-                
-                G4VPhysicalVolume* myVolume = theNavigator->LocateGlobalPointAndSetup(myPoint);
-                
-                G4String solidName=myVolume->GetName();
-                
-                if (solidName.contains("detectorPhysical")){//AROUCA: APENAS PARA LIMITAR O NUMERO DE ELECTROES EM TESTES
-                    //G4cout<<"INSIDE"<<G4endl;
-                    
-                    //AROUCA: METER AQUI O ESPECTRO DE EMISSAO DO XENON
-                    electronNumber++;
-                    XenonHit* xh = new XenonHit();
-                    xh->SetPos(myPoint);
-                    xh->SetTime(time);
-                    fGasBoxSD->InsertXenonHit(xh);
-                        // Create secondary electron
-                    if(electronNumber % 50 == 0){    
-                        G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
-                        G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
-                    }
-                }
-            }
-            v.clear(); //Faz reset ao vector senão vai continuar a adicionar os dadosadicionar os dados
-            nline=0;
+	    if (nline == 2) {
+		    for (i=0;i<v.size();i=i+7){
+			posXDegrad=v[i];
+			posYDegrad=v[i+1];
+			posZDegrad=v[i+2];
+			timeDegrad=v[i+3];
+			//convert from um to mm in GEANT4
+			//also Y and Z axes are swapped in GEANT4 and Garfield++ relatively to Degrad
+			posX=posXDegrad*0.001+posXInitial;
+			posY=posZDegrad*0.001+posYInitial;
+			posZ=posYDegrad*0.001+posZInitial;
+			//convert ps to ns
+			time=timeDegrad*0.001+timeInitial;
+			
+			
+			G4ThreeVector myPoint;
+			myPoint.setX(posX);
+			myPoint.setY(posY);
+			myPoint.setZ(posZ);
+			
+			//Check in which Physical volume the point belongs
+			G4Navigator* theNavigator= G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
+			
+			G4VPhysicalVolume* myVolume = theNavigator->LocateGlobalPointAndSetup(myPoint);
+			G4String solidName=myVolume->GetName();
+			if (solidName.contains("detectorPhysical")){//AROUCA: ONLY TO LIMIT THE NUMBER OF ELECTRODES IN TESTS
+			    //G4cout<<"INSIDE"<<G4endl;
+			    
+			    //AROUCA: PUT THE XENON EMISSION SPECTRUM HERE
+			    electronNumber++;
+			    XenonHit* xh = new XenonHit();
+			    xh->SetPos(myPoint);
+			    xh->SetTime(time);
+			    fGasBoxSD->InsertXenonHit(xh);
+				// Create secondary electron
+			    if(electronNumber % 50 == 0){    
+				G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+				G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
+			    }
+			}
+		    }
+            	}
+	    else {
+		for (i=0;i<v.size(); i+=4) {
+			posXDegrad=v[i];
+			posYDegrad=v[i+1];
+			posZDegrad=v[i+2];
+			timeDegrad=v[i+3];
+			//convert from um to mm in GEANT4
+			//also Y and Z axes are swapped in GEANT4 and Garfield++ relatively to Degrad
+			posX=posXDegrad*0.001+posXInitial;
+			posY=posZDegrad*0.001+posYInitial;
+			posZ=posYDegrad*0.001+posZInitial;
+			//convert ps to ns
+			time=timeDegrad*0.001+timeInitial;
+			G4ThreeVector myPoint;
+			myPoint.setX(posX);
+			myPoint.setY(posY);
+			myPoint.setZ(posZ);
+		}
+	    }
+            v.clear(); //Reset the vector or you will continue to add the data
+//            nline=0;
             
         }
         nline++;

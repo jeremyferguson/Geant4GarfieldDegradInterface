@@ -7,8 +7,9 @@
 #/control/cout/setCoutFile output.dmp
 /Xenon/phys/setLowLimitE 20. eV
 /Xenon/phys/InitializePhysics emlivermore
+/Xenon/phys/InitializePhysics decay 
 /Xenon/phys/AddParametrisation
-/process/em/AddPAIRegion all RegionGasBox PAIPhoton
+/process/em/AddPAIRegion all GasRegion PAIphoton
 
 #/random/setSeeds 0 0
 /run/initialize

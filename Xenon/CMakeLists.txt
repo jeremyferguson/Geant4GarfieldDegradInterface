@@ -35,6 +35,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Setup GARFIELD++ include directories
 include_directories($ENV{GARFIELD_HOME}/Include)
 include_directories($ENV{GARFIELD_HOME}/Heed)
+include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
 # Add additional libraries needed for GARFIELD++
 link_directories($ENV{GARFIELD_LIB})
 IF(APPLE)
@@ -62,7 +63,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 #
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 add_executable(Xenon Xenon.cc ${sources} ${headers})
-target_link_libraries(Xenon -lGarfield -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
+find_library(GARFIELD_LIBRARY Garfield HINTS ${GARFIELD_HOME})
+target_link_libraries(Xenon ${GARFIELD_LIBRARY} -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B1. This is so that we can run the executable directly because it

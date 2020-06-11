@@ -43,7 +43,7 @@ PhysicsListMessenger::PhysicsListMessenger(PhysicsList* pPhys)
   pListCmd->SetParameterName("PList", false);
   pListCmd->AvailableForStates(G4State_PreInit);
   pListCmd->SetCandidates(
-      "local emstandard_opt0 emstandard_opt1 emstandard_opt2 emstandard_opt3 "
+      "decay local emstandard_opt0 emstandard_opt1 emstandard_opt2 emstandard_opt3 "
       "standardSS standardGS standardWVI emlivermore empenelope");
 
   addParamCmd = new G4UIcmdWithoutParameter("/Xenon/phys/AddParametrisation", this);

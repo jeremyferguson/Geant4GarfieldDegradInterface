@@ -7,8 +7,9 @@
 #/control/cout/setCoutFile output.dmp
 /Xenon/phys/setLowLimitE 20. eV
 /Xenon/phys/InitializePhysics emlivermore
+/Xenon/phys/InitializePhysics decay 
 /Xenon/phys/AddParametrisation
-/process/em/AddPAIRegion all RegionGasBox PAIphoton
+/process/em/AddPAIRegion all GasRegion PAIphoton
 
 #/random/setSeeds 0 0
 /run/initialize
@@ -24,13 +25,13 @@
 /tracking/verbose 0
 /run/verbose 1
 /event/verbose 1
-/vis/verbose 6
+/vis/verbose 0
 ####################################
 ########### Visualization ##########
 ####################################
 #/vis/open VRML2FILE
-/vis/open OGL 600x600-0+0
-#/vis/open OGLSX
+#/vis/open OGL 600x600-0+0
+/vis/open OGLIXm
 # Draw geometry:
 /vis/drawVolume
 /vis/scene/add/trajectories smooth
@@ -46,9 +47,13 @@
 #/vis/modeling/trajectories/drawByParticleID-0/verbose 1
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/set 0 green
+/vis/modeling/trajectories/drawByCharge-0/set -1 red
 /vis/modeling/trajectories/drawByCharge-0/verbose 1
-#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
-#/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
+/vis/modeling/trajectories/drawByCharge-0/set 1 blue
+//vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+//vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+//vis/modeling/trajectories/drawByCharge-0/default/setDrawAuxPts true
+
 
 /vis/scene/endOfEventAction accumulate 1
 #/vis/scene/endOfRunAction accumulate

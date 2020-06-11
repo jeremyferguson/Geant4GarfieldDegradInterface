@@ -101,6 +101,8 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 		//	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
 		}						
 	}
+
+ 	G4cout << "Avalanche endpoints: " << fAvalanche->GetNumberOfElectronEndpoints() << G4endl; 
 	delete garfExcHitsCol;
 }
 // Selection of Xenon exitations and ionizations
@@ -141,7 +143,6 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalanche->SetUserHandleInelastic(userHandle);
 		
 	fAvalanche->SetSensor(sensor);			
-  
 }
 
 // Selection of Xenon exitations and ionizations

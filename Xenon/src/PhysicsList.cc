@@ -85,7 +85,7 @@ PhysicsList::PhysicsList()
   RegisterPhysics(new G4EmLivermorePhysics(1));
 
   // Add General Decay
-  RegisterPhysics(new G4DecayPhysics());
+  //RegisterPhysics(new G4DecayPhysics());
 
   // Add final state interactions following radioactive decay
   RegisterPhysics(new G4RadioactiveDecayPhysics());
@@ -134,6 +134,8 @@ void PhysicsList::InitializePhysicsList(const G4String& name) {
   } else if (name == "ionGasModels") {
     ReplacePhysics(new G4EmStandardPhysics(1));
     AddIonGasModels();
+  } else if (name == "decay") {
+    ReplacePhysics(new G4DecayPhysics());
   }
 }
 
