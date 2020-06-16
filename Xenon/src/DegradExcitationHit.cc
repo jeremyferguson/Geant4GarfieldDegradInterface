@@ -23,12 +23,10 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: XenonHit.cc 69706 2013-05-13 09:12:40Z gcosmo $
-//
-/// \file XenonHit.cc
-/// \brief Implementation of the XenonHit class
+/// \file DegradExcitationHit.cc
+/// \brief Implementation of the DegradExcitationHit class
 
-#include "XenonHit.hh"
+#include "DegradExcitationHit.hh"
 #include "G4UnitsTable.hh"
 #include "G4VVisManager.hh"
 #include "G4Circle.hh"
@@ -37,55 +35,49 @@
 
 #include <iomanip>
 
-G4ThreadLocal G4Allocator<XenonHit>* XenonHitAllocator=0;
+G4ThreadLocal G4Allocator<DegradExcitationHit>* DegradExcitationHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-XenonHit::XenonHit()
+DegradExcitationHit::DegradExcitationHit()
  : G4VHit(),
-   fTrackID(-1),
    fTime(-1),
-   fPos(G4ThreeVector()),
-   fEnergy(-1)
+   fPos(G4ThreeVector())
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-XenonHit::~XenonHit() {}
+DegradExcitationHit::~DegradExcitationHit() {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-XenonHit::XenonHit(const XenonHit& right)
+DegradExcitationHit::DegradExcitationHit(const DegradExcitationHit& right)
   : G4VHit()
 {
-  fTrackID   = right.fTrackID;
   fPos       = right.fPos;
   fTime      =right.fTime;
-  fEnergy    =right.fEnergy;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-const XenonHit& XenonHit::operator=(const XenonHit& right)
+const DegradExcitationHit& DegradExcitationHit::operator=(const DegradExcitationHit& right)
 {
-  fTrackID   = right.fTrackID;
   fPos       = right.fPos;
   fTime      =right.fTime;
-  fEnergy    =right.fEnergy;
 
   return *this;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4int XenonHit::operator==(const XenonHit& right) const
+G4int DegradExcitationHit::operator==(const DegradExcitationHit& right) const
 {
   return ( this == &right ) ? 1 : 0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void XenonHit::Draw()
+void DegradExcitationHit::Draw()
 {
   G4VVisManager* pVVisManager = G4VVisManager::GetConcreteInstance();
   if(pVVisManager)
@@ -93,20 +85,32 @@ void XenonHit::Draw()
     G4Circle circle(fPos);
     circle.SetScreenSize(3.);
     circle.SetFillStyle(G4Circle::filled);
-    G4Colour colour(0.,0.,1.);
+    G4Colour colour(1.,1.,1.);
     G4VisAttributes attribs(colour);
     circle.SetVisAttributes(attribs);
     pVVisManager->Draw(circle);
-    //G4cout << "Drawing Xenon hit " <<G4endl;
+    
+    //G4cout<<"DRAWING Degrad Excitation hit "<<fPos.getY()<<G4endl;
   }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void XenonHit::Print()
+G4ThreeVector DegradExcitationHit::GetPos()
 {
-	G4cout<<"HIT"<<G4endl;
-  G4cout<< "  trackID: " << fTrackID <<  " Time: "<< std::setw(7) << G4BestUnit(fTime,"Time")<< " Position: "<< std::setw(7) << G4BestUnit( fPos,"Length")<< G4endl;
+return fPos;
+}
+
+G4double DegradExcitationHit::GetTime()
+{
+return fTime;
+}
+
+
+void DegradExcitationHit::Print()
+{
+  G4cout<<"Degrad Exc HIT"<<G4endl;
+  G4cout<<   " Time: "<< std::setw(7) << G4BestUnit(fTime,"Time")<< " Position: "<< fPos<< G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

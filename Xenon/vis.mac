@@ -50,9 +50,9 @@
 /vis/modeling/trajectories/drawByCharge-0/set -1 red
 /vis/modeling/trajectories/drawByCharge-0/verbose 1
 /vis/modeling/trajectories/drawByCharge-0/set 1 blue
-//vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
-//vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
-//vis/modeling/trajectories/drawByCharge-0/default/setDrawAuxPts true
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts false
+/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawAuxPts false
 
 
 /vis/scene/endOfEventAction accumulate 1

@@ -6,6 +6,7 @@
 #include "G4Region.hh"
 #include "XenonHit.hh"
 #include "GarfieldExcitationHit.hh"
+#include "DegradExcitationHit.hh"
 
 class G4Step;
 class G4HCofThisEvent;
@@ -24,13 +25,15 @@ class GasBoxSD : public G4VSensitiveDetector{
 	virtual void DrawAll();
     void InsertXenonHit(XenonHit* xh){fXenonHitsCollection->insert(xh);};
     void InsertGarfieldExcitationHit(GarfieldExcitationHit* geh){fGarfieldExcitationHitsCollection->insert(geh);};
-    
+    void InsertDegradExcitationHit(DegradExcitationHit* dh){fDegradExcitationHitsCollection->insert(dh);};
 	private:
 	
     XenonHitsCollection* fXenonHitsCollection;
     GarfieldExcitationHitsCollection* fGarfieldExcitationHitsCollection;
+    DegradExcitationHitsCollection* fDegradExcitationHitsCollection;
     G4int XHCID;
     G4int GEHCID;
+    G4int DEHCID;
     
 	
 };

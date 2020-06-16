@@ -87,7 +87,7 @@ void GarfieldExcitationHit::Draw()
     G4Circle circle(fPos);
     circle.SetScreenSize(1.);
     circle.SetFillStyle(G4Circle::filled);
-    G4Colour colour(0.,1.,0.);
+    G4Colour colour(1.,1.,0.);
     G4VisAttributes attribs(colour);
     circle.SetVisAttributes(attribs);
     pVVisManager->Draw(circle);

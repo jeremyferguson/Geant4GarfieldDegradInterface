@@ -12,6 +12,7 @@
 #include "G4VFastSimulationModel.hh"
 #include "GasModelParameters.hh"
 #include "GasBoxSD.hh"
+#include "DegradExcitationHit.hh"
 
 class G4VPhysicalVolume;
 class DetectorConstruction;

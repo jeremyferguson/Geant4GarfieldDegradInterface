@@ -92,13 +92,13 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 		newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
 		newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
         fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-		fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation
-		if(i % (colHitsEntries/10) == 0){
+	//	fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation
+		if(i % (colHitsEntries/20) == 0){
 			G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 			// Create photons track
 			G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
-		//	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
-		//	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
+	//		G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+	//		G4ProcessVector* fAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
 		}						
 	}
 
