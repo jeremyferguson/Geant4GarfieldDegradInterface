@@ -57,6 +57,7 @@ public:
 	virtual G4bool ModelTrigger(const G4FastTrack &);
 	virtual void DoIt(const G4FastTrack&, G4FastStep&);
 	void GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime);
+
 	G4ThreeVector garfPos;
 	G4double garfTime;
 	
@@ -77,5 +78,5 @@ private:
 	GasBoxSD* fGasBoxSD;
 };
 
-void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m);
+void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m,  double e0, double e1, double dx0, double dy0, double dz0, double dx1, double dy1, double dz1);
 #endif /* GarfieldVUVPhotonModel_H_ */

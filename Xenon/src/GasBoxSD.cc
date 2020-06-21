@@ -53,10 +53,8 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
         G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
         return true;
     }
-
+    
     return false;
-    
-    
 }
 
 void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){

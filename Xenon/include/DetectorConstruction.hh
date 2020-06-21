@@ -58,6 +58,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline void SetCaloThickness(G4double d){caloThickness=d;};
   inline void SetGasPressure(G4double d){gasPressure=d;};
   inline void SetTemperature(G4double d){temperature=d;};
+  inline void SetMainGasPercentage(G4double d){MainGasPercentage=d;};
+  inline void SetSecondGasPercentage(G4double d){SecondGasPercentage=d;};
   //Getters for the dimensions and environment variables of the setup
   inline G4double GetWorldHalfLength(){return worldHalfLength;};
   inline G4double GetGasBoxR(){return gasboxR;};
@@ -66,8 +68,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline G4double GetCaloThickness(){return caloThickness;};
   inline G4double GetGasPressure(){return gasPressure;};
   inline G4double GetTemperature(){return temperature;};
-  inline G4double GetNeonPercentage(){return neonPercentage;};
-  inline G4double GetCO2Percentage(){return co2Percentage;};
+  inline G4double GetMainGasPercentage(){return MainGasPercentage;};
+  inline G4double GetSecondGasPercentage(){return SecondGasPercentage;};
     
   
  private:
@@ -83,8 +85,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double caloThickness; // thickness of the silicon detector
   G4double gasPressure; // pressure in the gas
   G4double temperature; // temperature of the gas
+  G4double MainGasPercentage;
+  G4double SecondGasPercentage;
   G4double addmixturePercentage;
-  G4double neonPercentage;
-  G4double co2Percentage;
 };
 #endif

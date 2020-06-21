@@ -17,6 +17,7 @@
 #include "G4VProcess.hh"
 #include "DegradExcitationHit.hh"
 #include "G4OpticalPhoton.hh"
+#include "DetectorConstruction.hh"
 
 DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* envelope,DetectorConstruction* dc, GasBoxSD* sd)
     : G4VFastSimulationModel(modelName, envelope),detCon(dc), fGasBoxSD(sd){
@@ -54,7 +55,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-        G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+        G4String degradString="printf \"2,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,12,0,0,0,0\n"+std::to_string(detCon->GetMainGasPercentage())+","+std::to_string(detCon->GetSecondGasPercentage())+",0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,2,2,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -65,7 +66,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         const char *mychar = full_path.c_str();
         G4cout << mychar << G4endl;
         stdout=system(mychar);
-        stdout=system("./convertDegradFile.py");
+        stdout=system("~/Geant4GarfieldDegradInterface/Xenon/build/convertDegradFile.py");
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
         processOccured=true;
@@ -106,7 +107,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
             
             eventNumber=v[0];
             Nep=v[1];
-            //                            Nexc=v[2];
+            //Nexc=v[2];
             v.clear();
         }
         if (nline ==2 || nline == 3) //Ionizations

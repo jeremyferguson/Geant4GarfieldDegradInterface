@@ -27,10 +27,10 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
     wallThickness(0.05*m), //thickness of the aluminum walls
     caloThickness(1.*mm), // thickness of the silicon detectors
-    gasPressure(1.*bar), // Pressure inside the gas
-    temperature(273.15*kelvin), // temperature
-    neonPercentage(85.72), // mixture settings
-    co2Percentage(9.52)
+    gasPressure(1.199*bar), // Pressure inside the gas
+    temperature(296*kelvin), // temperature
+    MainGasPercentage(100.), // mixture settings
+    SecondGasPercentage(0.)
 {
   detectorMessenger = new DetectorMessenger(this);
 
@@ -59,22 +59,35 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     Gas: mixture of Helium and Isobutane or Ar and CO2
     Calorimeter: Silicon 
   */
+   
+  const static G4double Torr = 1. / 760. * atmosphere;
   
-    
+  G4double MainGasMolarMass = 131.293 * g/mole;
+  G4double SecondGasMolarMass = 44.01*g/mole; 
+ 
   //World material: vacuum
   G4NistManager* man = G4NistManager::Instance();
   man->SetVerbose(1);
   G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
   
-  //Gas material: mixture of HeIso or ArCO2
+  //Gas material: mixture of CH4 and Xe.
   G4double nMoles = gasPressure / (8.314 * joule / mole * temperature);
-  G4Material* mixture=NULL;
   G4VPhysicalVolume* physiWorld = NULL;
-  
+  G4double MainGasDensity = nMoles * MainGasMolarMass;
+  G4double SecondGasDensity = nMoles * SecondGasMolarMass;
+  G4double MainMolFrac = (MainGasPercentage/100.) * MainGasMolarMass;
+  G4double SecondMolFrac = (SecondGasPercentage/100.) * SecondGasMolarMass;
+  G4double MainMolFrac_norm = MainMolFrac / (MainMolFrac + SecondMolFrac);
+  G4double SecondMolFrac_norm = SecondMolFrac / (MainMolFrac + SecondMolFrac);
+  G4double gasDensityMixture = (MainGasPercentage/100.) * MainGasDensity + (SecondGasPercentage/100.) * SecondGasDensity;
+  G4Material* mixture = new G4Material("mixture", gasDensityMixture, 2);
+
   G4Material* air = man->FindOrBuildMaterial("G4_AIR");
   G4Material* lead = man->FindOrBuildMaterial("G4_Pb");
-  const static G4double Torr = 1. / 760. * atmosphere;
-  G4Material* Xenon = man->ConstructNewGasMaterial ("Xenon900Torr", "G4_Xe", 296.*kelvin, 900.*Torr, false);
+  G4Material* MainGas = man->ConstructNewGasMaterial ("Main900Torr", "G4_Xe", temperature, gasPressure, false);
+  G4Material* SecondGas = man->ConstructNewGasMaterial("Second900Torr", "G4_CARBON_DIOXIDE", temperature, gasPressure, false);
+  mixture->AddMaterial(MainGas, MainMolFrac_norm);
+  mixture->AddMaterial(SecondGas, SecondMolFrac_norm);
   G4Material* glass= man->FindOrBuildMaterial("G4_MAGNESIUM_FLUORIDE");
   G4Material* kapton=man->FindOrBuildMaterial("G4_KAPTON");
   G4Material* fSteel = new G4Material("StainlessSteel", 7.80 * g/cm3, 3);
@@ -100,8 +113,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   G4MaterialPropertiesTable* mptXenon= new G4MaterialPropertiesTable();
   mptXenon->AddProperty("RINDEX",photonEnergyXenonIndex,XenonRindex,nEntriesXenonIndex);
-  Xenon->SetMaterialPropertiesTable(mptXenon);
+  MainGas->SetMaterialPropertiesTable(mptXenon);
   
+  
+  const G4int nEntriesCO2Index = 11;
+  G4double photonEnergyCO2Index[nEntriesCO2Index]={6.25*eV,6.41*eV,6.58*eV,6.75*eV,6.93*eV,7.12*eV,7.32*eV,7.54*eV,7.77*eV,8.01*eV,8.27*eV};
+  
+  G4double CO2Rindex[nEntriesCO2Index]={1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00};
+  
+  G4MaterialPropertiesTable* mptCO2= new G4MaterialPropertiesTable();
+  mptCO2->AddProperty("RINDEX",photonEnergyCO2Index,CO2Rindex,nEntriesCO2Index);
+  SecondGas->SetMaterialPropertiesTable(mptCO2);
+
+
   //PMT GLASS Refractive index
   const G4int nEntriesMgF2Index = 9;
   G4double photonEnergyMgF2[nEntriesMgF2Index]={6.19*eV,6.44*eV,6.70*eV,6.97*eV,7.26*eV,7.55*eV,7.86*eV,8.18*eV,8.51*eV};
@@ -228,14 +252,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
   
-  //Make XenonVolume
+  //Make MethaneVolume
   
   
   
   G4VSolid* detectorSolid=new  G4Tubs("detectorBox",0,gasboxR,gasboxH*0.5,0.,twopi);
   
   ////Place Detector in world
-  logicGasBox = new G4LogicalVolume(detectorSolid,Xenon,"detectorLogical");
+  logicGasBox = new G4LogicalVolume(detectorSolid,mixture,"detectorLogical");
   
   G4ThreeVector position3 = G4ThreeVector(0.,gasboxH*0.5,0.*mm);
   G4Transform3D transform3 = G4Transform3D(rotm,position3);
@@ -287,14 +311,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   //OPTICAL SURFACES
   
-  //Xenon-GLASS
+  //Methane-GLASS
   
-  G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonGlassSurface");
-  opXenon_Glass->SetModel(unified);                  // SetModel
-  opXenon_Glass->SetType(dielectric_dielectric);   // SetType
-  opXenon_Glass->SetFinish(polished);                 // SetFinish
+  G4OpticalSurface* opMethane_Glass = new G4OpticalSurface("MethaneGlassSurface");
+  opMethane_Glass->SetModel(unified);                  // SetModel
+  opMethane_Glass->SetType(dielectric_dielectric);   // SetType
+  opMethane_Glass->SetFinish(polished);                 // SetFinish
   
-  new G4LogicalBorderSurface("XenonGlass",detectorPhysical,pmtPhysical,opXenon_Glass);
+  new G4LogicalBorderSurface("MethaneGlass",detectorPhysical,pmtPhysical,opMethane_Glass);
   
   //    // visualization attributes ------------------------------------------------
   

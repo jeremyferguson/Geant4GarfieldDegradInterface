@@ -48,8 +48,8 @@ class DetectorMessenger : public G4UImessenger {
   G4UIdirectory* geometryDir;  ///<\brief /Xenon/geometry/
 
   G4UIcmdWithADoubleAndUnit* setGasPressCmd;
-    
-    
+  G4UIcmdWithADouble* setMainGasPerCmd;
+  G4UIcmdWithADouble* setSecondGasPerCmd;
     
 };
 

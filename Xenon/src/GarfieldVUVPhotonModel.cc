@@ -36,11 +36,9 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 }
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {	
-	if (particleType.GetParticleName()=="e-")
+	if (particleType.GetParticleName()=="e-") 
 		return true;
   	return false;
-		
-		
 }
 
 G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
@@ -48,7 +46,6 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   if (ekin<thermalE)
 		return true;
   return false;
-
 } 
 	
 void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) 
@@ -61,9 +58,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
 
-
     GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
-    
 
 }
 
@@ -71,8 +66,6 @@ GarfieldExcitationHitsCollection *garfExcHitsCol;
 
 void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime)
 {
-
-	
 	G4double x0=garfPos.getX()*0.1;//Garfield length units are in cm
 	G4double y0=garfPos.getY()*0.1;
 	G4double z0=garfPos.getZ()*0.1;
@@ -93,7 +86,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 		newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
         fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
 	//	fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation
-		if(i % (colHitsEntries/20) == 0){
+		if(colHitsEntries < 10 || i % (colHitsEntries/10) == 0){
 			G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 			// Create photons track
 			G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
@@ -114,7 +107,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	fMediumMagboltz->SetTemperature(temperature);
 	fMediumMagboltz->SetPressure(pressure);
-	fMediumMagboltz->SetComposition("Xe", 100.);
+	fMediumMagboltz->SetComposition("Xe", detCon->GetMainGasPercentage(), "CO2",detCon->GetSecondGasPercentage());
 
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
 	// Make a box
@@ -140,28 +133,34 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalanche = new Garfield::AvalancheMicroscopic();
 
 
-	fAvalanche->SetUserHandleInelastic(userHandle);
+	fAvalanche->SetUserHandleCollision(userHandle);
 		
 	fAvalanche->SetSensor(sensor);			
 }
 
 // Selection of Xenon exitations and ionizations
-void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m)
+void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m, double e0, double e1, double dx0, double dy0, double dz0,double dx1, double dy1, double dz1)
 {
 	G4ThreeVector Pos;
 
+	if (type == 1) {
+		G4cout << "Ionisation" << G4endl;
+	}	
 	if (level > 2 && level < 53){//XENON LEVELS
+		if (type == 4) {	
+			GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
+			Pos.setX(x*10);//back to cm to GEANT4
+			Pos.setY(y*10);//back to cm to GEANT4
+			Pos.setZ(z*10);//back to cm to GEANT4
+			newExcHit->SetPos(Pos);
+			newExcHit->SetTime(t);
+			garfExcHitsCol->insert(newExcHit);
+			//If choose to draw change the visualizer from OGL to HepRep in vis.mac file
+			//newExcHit->Draw();
+		}
+//		G4cout << "Energies: " << e0 << " " << e1 << G4endl;
+	}
 	
-	GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
-	Pos.setX(x*10);//back to cm to GEANT4
-	Pos.setY(y*10);//back to cm to GEANT4
-	Pos.setZ(z*10);//back to cm to GEANT4
-	newExcHit->SetPos(Pos);
-	newExcHit->SetTime(t);
-	garfExcHitsCol->insert(newExcHit);
-	//If choose to draw change the visualizer from OGL to HepRep in vis.mac file
-	//newExcHit->Draw();	
-	}// if level
 	
-	
-}// end userhandle	
+}// end userhandle
+

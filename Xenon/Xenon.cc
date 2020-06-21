@@ -85,9 +85,23 @@ int main(int argc, char** argv) {
       delete runManager;
       return 0;
     }
-
+    if (argc >= 5) {
+	G4String mainArg = argv[3];
+	G4String secArg = argv[4];
+	G4String mainCmd = "/Xenon/geometry/SetMainGasPercentage " + mainArg;
+	G4String secCmd = "/Xenon/geometry/SetSecondGasPercentage " + secArg;
+	UImanager->ApplyCommand(mainCmd);
+	UImanager->ApplyCommand(secCmd);
+    }
+    G4UIExecutive* ui;
     time_t start=time(0);
+    if (argc == 6) {
+	ui = new G4UIExecutive(argc, argv);
+    } 
     UImanager->ApplyCommand(command + fileName);
+    if (argc == 6) {
+	ui->SessionStart();
+    }
     double duration = difftime(time(0),start);
     cout << "Simulation Time: " << duration << endl;
   }

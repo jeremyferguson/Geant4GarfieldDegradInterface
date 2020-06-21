@@ -31,7 +31,20 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* HPGeDet)
     setGasPressCmd->SetUnitCategory("Pressure");
     setGasPressCmd->SetDefaultValue(0.3 * bar);
     setGasPressCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
-    
+
+    setMainGasPerCmd =
+      new G4UIcmdWithADouble("/Xenon/geometry/SetMainGasPercentage", this);
+
+    setMainGasPerCmd->SetGuidance("Set percentage of the main gas in the mixture");
+    setMainGasPerCmd->SetDefaultValue(100.0);
+    setMainGasPerCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+    setSecondGasPerCmd =
+      new G4UIcmdWithADouble("/Xenon/geometry/SetSecondGasPercentage", this);
+
+    setSecondGasPerCmd->SetGuidance("Set percentage of the second gas in the mixture");
+    setSecondGasPerCmd->SetDefaultValue(100.0);
+    setSecondGasPerCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -47,4 +60,8 @@ DetectorMessenger::~DetectorMessenger() {
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValues) {
   if (command == setGasPressCmd)
     detector->SetGasPressure(setGasPressCmd->GetNewDoubleValue(newValues));
+  else if (command == setMainGasPerCmd)
+	  detector->SetMainGasPercentage(setMainGasPerCmd->GetNewDoubleValue(newValues));
+  else if (command == setSecondGasPerCmd)
+	  detector->SetSecondGasPercentage(setSecondGasPerCmd->GetNewDoubleValue(newValues));
 }

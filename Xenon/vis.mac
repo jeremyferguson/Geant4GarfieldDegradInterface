@@ -1,5 +1,4 @@
-/Xenon/geometry/SetGasPressure 1. bar
-
+/Xenon/geometry/SetGasPressure 1.199 bar
 /gasModelParameters/degrad/thermalenergy 10. eV
 
 /run/numberOfThreads 1
