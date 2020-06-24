@@ -30,7 +30,11 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     gasPressure(1.199*bar), // Pressure inside the gas
     temperature(296*kelvin), // temperature
     MainGasPercentage(100.), // mixture settings
-    SecondGasPercentage(0.)
+    SecondGasPercentage(0.),
+    ImpurityGasPercentage(0.),
+    mainGas("Xe"),
+    secondGas("CO2"),
+    impurityGas("H2O")
 {
   detectorMessenger = new DetectorMessenger(this);
 
@@ -53,6 +57,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4VisAttributes* yellow = new G4VisAttributes(G4Colour(1.0, 1.0, 0.));
   G4VisAttributes* purple = new G4VisAttributes(G4Colour(1.0, 0., 1.0));
 
+  //SetImpurityGasPercentage(.0001);
   /*First: build materials
     World: vacuum
     Walls: Aluminum
@@ -62,9 +67,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
    
   const static G4double Torr = 1. / 760. * atmosphere;
   
-  G4double MainGasMolarMass = 131.293 * g/mole;
-  G4double SecondGasMolarMass = 44.01*g/mole; 
- 
+  G4double MainGasMolarMass = GetMainMolarMass() * g/mole;
+  G4double SecondGasMolarMass = GetSecondMolarMass() * g/mole; 
+  G4double ImpurityGasMolarMass = GetImpurityMolarMass() * g/mole;
+
   //World material: vacuum
   G4NistManager* man = G4NistManager::Instance();
   man->SetVerbose(1);
@@ -75,30 +81,35 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4VPhysicalVolume* physiWorld = NULL;
   G4double MainGasDensity = nMoles * MainGasMolarMass;
   G4double SecondGasDensity = nMoles * SecondGasMolarMass;
+  G4double ImpurityGasDensity = nMoles * ImpurityGasMolarMass;
   G4double MainMolFrac = (MainGasPercentage/100.) * MainGasMolarMass;
   G4double SecondMolFrac = (SecondGasPercentage/100.) * SecondGasMolarMass;
-  G4double MainMolFrac_norm = MainMolFrac / (MainMolFrac + SecondMolFrac);
-  G4double SecondMolFrac_norm = SecondMolFrac / (MainMolFrac + SecondMolFrac);
-  G4double gasDensityMixture = (MainGasPercentage/100.) * MainGasDensity + (SecondGasPercentage/100.) * SecondGasDensity;
-  G4Material* mixture = new G4Material("mixture", gasDensityMixture, 2);
+  G4double ImpurityMolFrac = (ImpurityGasPercentage/100.) * ImpurityGasMolarMass;
+  G4double MainMolFrac_norm = MainMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
+  G4double SecondMolFrac_norm = SecondMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
+  G4double ImpurityMolFrac_norm = ImpurityMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
+  G4double gasDensityMixture = (MainGasPercentage/100.) * MainGasDensity + (SecondGasPercentage/100.) * SecondGasDensity + (ImpurityGasPercentage/100.) * ImpurityGasDensity;
+  G4Material* mixture = new G4Material("mixture", gasDensityMixture, 3);
 
   G4Material* air = man->FindOrBuildMaterial("G4_AIR");
   G4Material* lead = man->FindOrBuildMaterial("G4_Pb");
-  G4Material* MainGas = man->ConstructNewGasMaterial ("Main900Torr", "G4_Xe", temperature, gasPressure, false);
-  G4Material* SecondGas = man->ConstructNewGasMaterial("Second900Torr", "G4_CARBON_DIOXIDE", temperature, gasPressure, false);
+  G4Material* MainGas = man->ConstructNewGasMaterial ("Main900Torr", GetMainGeantName(), temperature, gasPressure, false);
+  G4Material* SecondGas = man->ConstructNewGasMaterial("Second900Torr", GetSecondGeantName(), temperature, gasPressure, false);
+  G4Material* ImpurityGas = man->ConstructNewGasMaterial("Impurity900Torr",GetImpurityGeantName(), temperature, gasPressure, false);
   mixture->AddMaterial(MainGas, MainMolFrac_norm);
   mixture->AddMaterial(SecondGas, SecondMolFrac_norm);
+  mixture->AddMaterial(ImpurityGas, ImpurityMolFrac_norm);
   G4Material* glass= man->FindOrBuildMaterial("G4_MAGNESIUM_FLUORIDE");
   G4Material* kapton=man->FindOrBuildMaterial("G4_KAPTON");
   G4Material* fSteel = new G4Material("StainlessSteel", 7.80 * g/cm3, 3);
   G4Element* elFe = man->FindOrBuildElement("Fe");
   G4Element* elNi = man->FindOrBuildElement("Ni");
+  G4Element* elO = man->FindOrBuildElement("O");
   G4Element* elCr = man->FindOrBuildElement("Cr");
   fSteel->AddElement(elFe, 70 * perCent);
   fSteel->AddElement(elCr, 18 * perCent);
   fSteel->AddElement(elNi, 12 * perCent);
   G4Element* elAl = man->FindOrBuildElement("Al");
-  G4Element* elO = man->FindOrBuildElement("O");
   G4Material* fMacor=new G4Material("ceramic", 2.52 * g/cm3, 2);
   fMacor->AddElement(elAl,2);
   fMacor->AddElement(elO,3);
@@ -106,24 +117,32 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4Material* steel304=man->FindOrBuildMaterial("StainlessSteel");
   G4Material* ceramic=man->FindOrBuildMaterial("ceramic");  //MACOR
 
-  const G4int nEntriesXenonIndex = 11;
-  G4double photonEnergyXenonIndex[nEntriesXenonIndex]={6.25*eV,6.41*eV,6.58*eV,6.75*eV,6.93*eV,7.12*eV,7.32*eV,7.54*eV,7.77*eV,8.01*eV,8.27*eV};
+  const G4int nEntriesMainIndex = 2;
+  G4double photonEnergyMainIndex[nEntriesMainIndex]={6.25*eV,8.27*eV};
   
-  G4double XenonRindex[nEntriesXenonIndex]={1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00};
+  G4double MainRindex[nEntriesMainIndex]={GetMainRIndex(), GetMainRIndex()};
   
-  G4MaterialPropertiesTable* mptXenon= new G4MaterialPropertiesTable();
-  mptXenon->AddProperty("RINDEX",photonEnergyXenonIndex,XenonRindex,nEntriesXenonIndex);
-  MainGas->SetMaterialPropertiesTable(mptXenon);
+  G4MaterialPropertiesTable* mptMain= new G4MaterialPropertiesTable();
+  mptMain->AddProperty("RINDEX",photonEnergyMainIndex,MainRindex,nEntriesMainIndex);
+  MainGas->SetMaterialPropertiesTable(mptMain);
   
   
-  const G4int nEntriesCO2Index = 11;
-  G4double photonEnergyCO2Index[nEntriesCO2Index]={6.25*eV,6.41*eV,6.58*eV,6.75*eV,6.93*eV,7.12*eV,7.32*eV,7.54*eV,7.77*eV,8.01*eV,8.27*eV};
+  const G4int nEntriesSecondIndex = 2;
+  G4double photonEnergySecondIndex[nEntriesSecondIndex]={6.25*eV,8.27*eV};
   
-  G4double CO2Rindex[nEntriesCO2Index]={1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00};
+  G4double SecondRindex[nEntriesSecondIndex]={GetSecondRIndex(), GetSecondRIndex()};
   
-  G4MaterialPropertiesTable* mptCO2= new G4MaterialPropertiesTable();
-  mptCO2->AddProperty("RINDEX",photonEnergyCO2Index,CO2Rindex,nEntriesCO2Index);
-  SecondGas->SetMaterialPropertiesTable(mptCO2);
+  G4MaterialPropertiesTable* mptSecond= new G4MaterialPropertiesTable();
+  mptSecond->AddProperty("RINDEX",photonEnergySecondIndex,SecondRindex,nEntriesSecondIndex);
+  SecondGas->SetMaterialPropertiesTable(mptSecond);
+
+  const G4int nEntriesImpurityIndex = 2;
+  G4double photonEnergyImpurityIndex[nEntriesImpurityIndex] = {6.25*eV, 8.27*eV};
+
+  G4double ImpurityRindex[nEntriesImpurityIndex] = {GetImpurityRIndex(), GetImpurityRIndex()};
+  G4MaterialPropertiesTable* mptImpurity = new G4MaterialPropertiesTable();
+  mptImpurity->AddProperty("RINDEX",photonEnergyImpurityIndex, ImpurityRindex, nEntriesImpurityIndex);
+  ImpurityGas->SetMaterialPropertiesTable(mptImpurity);
 
 
   //PMT GLASS Refractive index

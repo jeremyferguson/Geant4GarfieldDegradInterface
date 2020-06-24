@@ -55,7 +55,21 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-        G4String degradString="printf \"2,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,12,0,0,0,0\n"+std::to_string(detCon->GetMainGasPercentage())+","+std::to_string(detCon->GetSecondGasPercentage())+",0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,2,2,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+	G4int ngas = 1;
+	ngas += (detCon->GetSecondGasPercentage() == 0.0 ? 0:1);
+	ngas += (detCon->GetImpurityGasPercentage() == 0.0 ? 0:1);
+	G4String ngasstr = std::to_string(ngas);
+	G4double secPer = detCon->GetSecondGasPercentage();
+	G4double impPer = detCon->GetImpurityGasPercentage();
+	G4String secNum = detCon->GetSecondDegradNumber();
+	G4String impNum = detCon->GetImpurityDegradNumber();
+	G4String ngas1 = detCon->GetMainDegradNumber();
+	G4String ngas2 = secPer != 0.0 ? secNum : impPer == 0.0 ? "0" : impNum;
+	G4String ngas3 = (secPer != 0.0 && impPer != 0.0) ? impNum : "0";
+	G4String percentage1 = std::to_string(detCon->GetMainGasPercentage());
+        G4String percentage2 = std::to_string(secPer != 0.0 ? secPer : impPer);
+	G4String percentage3 = std::to_string(secPer != 0.0 ? impPer : 0.0);	
+        G4String degradString="printf \""+ngasstr+",1,3,-1,"+seed+",5900.0,7.0,0.0\n"+ngas1+","+ngas2+",0,0,0,0\n"+ percentage1 +","+ percentage2 +",0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,2,2,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -139,6 +153,11 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
 		G4Navigator* theNavigator= G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
 		
 		G4VPhysicalVolume* myVolume = theNavigator->LocateGlobalPointAndSetup(myPoint);
+		
+		G4cout << (nline == 2 ? "Electron" : "Photon") << ":(" << posX << ", " << posY << ", " << posZ << ")" << G4endl;
+		if (myVolume == 0) {
+			continue;
+		}
 		G4String solidName=myVolume->GetName();
 		if (solidName.contains("detectorPhysical")){//AROUCA: ONLY TO LIMIT THE NUMBER OF ELECTRODES IN TESTS
 		    //G4cout<<"INSIDE"<<G4endl;

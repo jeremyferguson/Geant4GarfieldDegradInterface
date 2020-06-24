@@ -45,6 +45,34 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* HPGeDet)
     setSecondGasPerCmd->SetGuidance("Set percentage of the second gas in the mixture");
     setSecondGasPerCmd->SetDefaultValue(100.0);
     setSecondGasPerCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+    setImpurityGasPerCmd =
+      new G4UIcmdWithADouble("/Xenon/geometry/SetImpurityGasPercentage", this);
+
+    setImpurityGasPerCmd->SetGuidance("Set percentage of the impurity gas in the mixture");
+    setImpurityGasPerCmd->SetDefaultValue(100.0);
+    setImpurityGasPerCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+    
+    setMainGasCmd = 
+	new G4UIcommand("/Xenon/geometry/SetMainGas",this);
+    setMainGasCmd->SetGuidance("Set the main gas");
+    G4UIparameter* mainGasName = new G4UIparameter("GasType", 's', false);
+    mainGasName->SetParameterCandidates("Xe Ar");
+    setMainGasCmd->SetParameter(mainGasName);
+
+    setSecondGasCmd = 
+        new G4UIcommand("/Xenon/geometry/SetSecondGas", this);
+    setSecondGasCmd->SetGuidance("Set the second gas");
+    G4UIparameter* secondGasName = new G4UIparameter("GasType", 's', false);
+    secondGasName->SetParameterCandidates("CO2 CH4");
+    setSecondGasCmd->SetParameter(secondGasName);
+    
+    setImpurityGasCmd = 
+        new G4UIcommand("/Xenon/geometry/SetImpurityGas", this);
+    setImpurityGasCmd->SetGuidance("Set the impurity gas");
+    G4UIparameter* impurityGasName = new G4UIparameter("GasType", 's', false);
+    impurityGasName->SetParameterCandidates("O2 H2O");
+    setImpurityGasCmd->SetParameter(impurityGasName);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -64,4 +92,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValues) {
 	  detector->SetMainGasPercentage(setMainGasPerCmd->GetNewDoubleValue(newValues));
   else if (command == setSecondGasPerCmd)
 	  detector->SetSecondGasPercentage(setSecondGasPerCmd->GetNewDoubleValue(newValues));
+  else if (command == setImpurityGasPerCmd)
+	  detector->SetImpurityGasPercentage(setImpurityGasPerCmd->GetNewDoubleValue(newValues));
+  else if (command == setMainGasCmd)
+	  detector->SetMainGas(newValues);
+  else if (command == setSecondGasCmd)
+	  detector->SetSecondGas(newValues);
+  else if (command == setImpurityGasCmd)
+	  detector->SetImpurityGas(newValues);
 }

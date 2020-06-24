@@ -107,7 +107,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	fMediumMagboltz->SetTemperature(temperature);
 	fMediumMagboltz->SetPressure(pressure);
-	fMediumMagboltz->SetComposition("Xe", detCon->GetMainGasPercentage(), "CO2",detCon->GetSecondGasPercentage());
+	fMediumMagboltz->SetComposition(detCon->GetMainGas(), detCon->GetMainGasPercentage(), detCon->GetSecondGas(),detCon->GetSecondGasPercentage(),detCon->GetImpurityGas(), detCon->GetImpurityGasPercentage());
 
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
 	// Make a box

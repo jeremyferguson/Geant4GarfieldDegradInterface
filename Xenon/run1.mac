@@ -1,4 +1,6 @@
-/Xenon/geometry/SetGasPressure 0.6 bar
+/Xenon/geometry/SetGasPressure 1.199 bar
+/Xenon/geometry/SetMainGas Ar
+
 
 /gasModelParameters/degrad/thermalenergy 10. eV
 
