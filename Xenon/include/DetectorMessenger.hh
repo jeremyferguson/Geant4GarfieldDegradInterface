@@ -51,9 +51,11 @@ class DetectorMessenger : public G4UImessenger {
   G4UIcmdWithADouble* setMainGasPerCmd;
   G4UIcmdWithADouble* setSecondGasPerCmd;
   G4UIcmdWithADouble* setImpurityGasPerCmd;
+  G4UIcmdWithADouble* setThirdGasPerCmd;
   G4UIcommand* setMainGasCmd;
   G4UIcommand* setSecondGasCmd;  
   G4UIcommand* setImpurityGasCmd;
+  G4UIcommand* setThirdGasCmd;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -32,7 +32,7 @@
 /ALICE/phys/setLowLimitE 20. eV
 /ALICE/phys/InitializePhysics emlivermore
 /ALICE/phys/AddParametrisation
-/process/em/AddPAIRegion all RegionGasBox PAIphoton
+/process/em/AddPAIRegion all GasRegion PAIphoton
 
 #/random/setSeeds 0 0
 /run/initialize
@@ -52,12 +52,12 @@
 ####################################
 ########### Visualization ##########
 ####################################
-/vis/open VRML2FILE
+#/vis/open VRML2FILE
 #/vis/open OGL 600x600-0+0
-#/vis/open OGLSX
+/vis/open OGLIXm
 # Draw geometry:
 /vis/drawVolume
-/vis/scene/add/trajectories smooth
+/vis/scene/add/trajectories rich
 /vis/scene/add/hits
 /vis/viewer/set/lightsThetaPhi 90. 0.
 /vis/viewer/set/viewpointThetaPhi 150. 90.
@@ -72,7 +72,7 @@
 /vis/modeling/trajectories/drawByCharge-0/set -1 green
 /vis/modeling/trajectories/drawByCharge-0/set +1 yellow
 /vis/modeling/trajectories/drawByCharge-0/verbose 1
-#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
 
 /vis/scene/endOfEventAction accumulate 1

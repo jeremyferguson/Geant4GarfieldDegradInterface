@@ -30,8 +30,6 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     caloThickness(1.*mm), // thickness of the silicon detectors
     gasPressure(1.*bar), // Pressure inside the gas
     temperature(273.15*kelvin), // temperature
-    neonPercentage(85.72), // mixture settings
-    co2Percentage(9.52)
 {
   detectorMessenger = new DetectorMessenger(this);
 

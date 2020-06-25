@@ -1,3 +1,4 @@
+#include <math.h>
 #include "DetectorConstruction.hh"
 #include "G4PVParameterised.hh"
 #include "G4PVReplica.hh"
@@ -32,9 +33,11 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     MainGasPercentage(100.), // mixture settings
     SecondGasPercentage(0.),
     ImpurityGasPercentage(0.),
+    ThirdGasPercentage(0.),
     mainGas("Xe"),
-    secondGas("CO2"),
-    impurityGas("H2O")
+    secondGas("Ar"),
+    impurityGas("H2O"),
+    thirdGas("CO2")
 {
   detectorMessenger = new DetectorMessenger(this);
 
@@ -70,6 +73,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double MainGasMolarMass = GetMainMolarMass() * g/mole;
   G4double SecondGasMolarMass = GetSecondMolarMass() * g/mole; 
   G4double ImpurityGasMolarMass = GetImpurityMolarMass() * g/mole;
+  G4double ThirdGasMolarMass = GetThirdMolarMass() * g/mole;
 
   //World material: vacuum
   G4NistManager* man = G4NistManager::Instance();
@@ -82,23 +86,28 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double MainGasDensity = nMoles * MainGasMolarMass;
   G4double SecondGasDensity = nMoles * SecondGasMolarMass;
   G4double ImpurityGasDensity = nMoles * ImpurityGasMolarMass;
+  G4double ThirdGasDensity = nMoles * ThirdGasMolarMass;
   G4double MainMolFrac = (MainGasPercentage/100.) * MainGasMolarMass;
   G4double SecondMolFrac = (SecondGasPercentage/100.) * SecondGasMolarMass;
   G4double ImpurityMolFrac = (ImpurityGasPercentage/100.) * ImpurityGasMolarMass;
-  G4double MainMolFrac_norm = MainMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
-  G4double SecondMolFrac_norm = SecondMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
-  G4double ImpurityMolFrac_norm = ImpurityMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac);
-  G4double gasDensityMixture = (MainGasPercentage/100.) * MainGasDensity + (SecondGasPercentage/100.) * SecondGasDensity + (ImpurityGasPercentage/100.) * ImpurityGasDensity;
-  G4Material* mixture = new G4Material("mixture", gasDensityMixture, 3);
+  G4double ThirdMolFrac = (ThirdGasPercentage/100.) * ThirdGasMolarMass;
+  G4double MainMolFrac_norm = MainMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac + ThirdMolFrac);
+  G4double SecondMolFrac_norm = SecondMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac + ThirdMolFrac);
+  G4double ImpurityMolFrac_norm = ImpurityMolFrac / (MainMolFrac + SecondMolFrac + ImpurityMolFrac + ThirdMolFrac);
+  G4double ThirdMolFrac_norm = ThirdMolFrac / (MainMolFrac + SecondMolFrac + ThirdMolFrac + ImpurityMolFrac);
+  G4double gasDensityMixture = (MainGasPercentage/100.) * MainGasDensity + (SecondGasPercentage/100.) * SecondGasDensity + (ImpurityGasPercentage/100.) * ImpurityGasDensity + (ThirdGasPercentage/100.) * ThirdGasDensity;
+  G4Material* mixture = new G4Material("mixture", gasDensityMixture, 4);
 
   G4Material* air = man->FindOrBuildMaterial("G4_AIR");
   G4Material* lead = man->FindOrBuildMaterial("G4_Pb");
-  G4Material* MainGas = man->ConstructNewGasMaterial ("Main900Torr", GetMainGeantName(), temperature, gasPressure, false);
-  G4Material* SecondGas = man->ConstructNewGasMaterial("Second900Torr", GetSecondGeantName(), temperature, gasPressure, false);
-  G4Material* ImpurityGas = man->ConstructNewGasMaterial("Impurity900Torr",GetImpurityGeantName(), temperature, gasPressure, false);
+  G4Material* MainGas = man->ConstructNewGasMaterial ("Main", GetMainGeantName(), temperature, gasPressure, false);
+  G4Material* SecondGas = man->ConstructNewGasMaterial("Second", GetSecondGeantName(), temperature, gasPressure, false);
+  G4Material* ImpurityGas = man->ConstructNewGasMaterial("Impurity",GetImpurityGeantName(), temperature, gasPressure, false);
+  G4Material* ThirdGas = man->ConstructNewGasMaterial("Third",GetThirdGeantName(), temperature, gasPressure, false);
   mixture->AddMaterial(MainGas, MainMolFrac_norm);
   mixture->AddMaterial(SecondGas, SecondMolFrac_norm);
   mixture->AddMaterial(ImpurityGas, ImpurityMolFrac_norm);
+  mixture->AddMaterial(ThirdGas, ThirdMolFrac_norm);
   G4Material* glass= man->FindOrBuildMaterial("G4_MAGNESIUM_FLUORIDE");
   G4Material* kapton=man->FindOrBuildMaterial("G4_KAPTON");
   G4Material* fSteel = new G4Material("StainlessSteel", 7.80 * g/cm3, 3);
@@ -119,31 +128,46 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   const G4int nEntriesMainIndex = 2;
   G4double photonEnergyMainIndex[nEntriesMainIndex]={6.25*eV,8.27*eV};
-  
-  G4double MainRindex[nEntriesMainIndex]={GetMainRIndex(), GetMainRIndex()};
+ 
+  G4double MainRefractivity = GetMainRIndex();
+  G4double MainRindex = sqrt(((-GetMainMolarMass()/(MainGasDensity/(g/L))) - 2 * MainRefractivity) / (MainRefractivity - (GetMainMolarMass()/(MainGasDensity/(g/L)))));
+  G4double MainRindices[nEntriesMainIndex]={MainRindex, MainRindex};
   
   G4MaterialPropertiesTable* mptMain= new G4MaterialPropertiesTable();
-  mptMain->AddProperty("RINDEX",photonEnergyMainIndex,MainRindex,nEntriesMainIndex);
+  mptMain->AddProperty("RINDEX",photonEnergyMainIndex,MainRindices,nEntriesMainIndex);
   MainGas->SetMaterialPropertiesTable(mptMain);
   
   
   const G4int nEntriesSecondIndex = 2;
   G4double photonEnergySecondIndex[nEntriesSecondIndex]={6.25*eV,8.27*eV};
   
-  G4double SecondRindex[nEntriesSecondIndex]={GetSecondRIndex(), GetSecondRIndex()};
+  G4double SecondRefractivity = GetSecondRIndex();
+  G4double SecondRindex = sqrt(((-GetSecondMolarMass()/(SecondGasDensity/(g/L))) - 2 * SecondRefractivity) / (SecondRefractivity - (GetSecondMolarMass()/(SecondGasDensity/(g/L)))));
+  G4double SecondRindices[nEntriesSecondIndex]={SecondRindex, SecondRindex};
   
   G4MaterialPropertiesTable* mptSecond= new G4MaterialPropertiesTable();
-  mptSecond->AddProperty("RINDEX",photonEnergySecondIndex,SecondRindex,nEntriesSecondIndex);
+  mptSecond->AddProperty("RINDEX",photonEnergySecondIndex,SecondRindices,nEntriesSecondIndex);
   SecondGas->SetMaterialPropertiesTable(mptSecond);
 
   const G4int nEntriesImpurityIndex = 2;
   G4double photonEnergyImpurityIndex[nEntriesImpurityIndex] = {6.25*eV, 8.27*eV};
 
-  G4double ImpurityRindex[nEntriesImpurityIndex] = {GetImpurityRIndex(), GetImpurityRIndex()};
+  G4double ImpurityRefractivity = GetImpurityRIndex();
+  G4double ImpurityRindex = sqrt(((-GetImpurityMolarMass()/(ImpurityGasDensity/(g/L))) - 2 * ImpurityRefractivity) / (ImpurityRefractivity - (GetImpurityMolarMass()/(ImpurityGasDensity/(g/L)))));
+  G4double ImpurityRindices[nEntriesImpurityIndex]={ImpurityRindex, ImpurityRindex};
   G4MaterialPropertiesTable* mptImpurity = new G4MaterialPropertiesTable();
-  mptImpurity->AddProperty("RINDEX",photonEnergyImpurityIndex, ImpurityRindex, nEntriesImpurityIndex);
+  mptImpurity->AddProperty("RINDEX",photonEnergyImpurityIndex, ImpurityRindices, nEntriesImpurityIndex);
   ImpurityGas->SetMaterialPropertiesTable(mptImpurity);
 
+  const G4int nEntriesThirdIndex = 2;
+  G4double photonEnergyThirdIndex[nEntriesImpurityIndex] = {6.25*eV, 8.27*eV};
+  
+  G4double ThirdRefractivity = GetThirdRIndex();
+  G4double ThirdRindex = sqrt(((-GetThirdMolarMass()/(ThirdGasDensity/(g/L))) - 2 * ThirdRefractivity) / (ThirdRefractivity - (GetThirdMolarMass()/(ThirdGasDensity/(g/L)))));
+  G4double ThirdRindices[nEntriesThirdIndex]={ThirdRindex, ThirdRindex};
+  G4MaterialPropertiesTable* mptThird = new G4MaterialPropertiesTable();
+  mptThird->AddProperty("RINDEX",photonEnergyThirdIndex, ThirdRindices, nEntriesThirdIndex);
+  ThirdGas->SetMaterialPropertiesTable(mptThird);
 
   //PMT GLASS Refractive index
   const G4int nEntriesMgF2Index = 9;

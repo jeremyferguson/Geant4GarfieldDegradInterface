@@ -32,7 +32,7 @@
 /ALICE/phys/setLowLimitE 20. eV
 /ALICE/phys/InitializePhysics emlivermore
 /ALICE/phys/AddParametrisation
-/process/em/AddPAIRegion all RegionGasBox PAIPhoton
+/process/em/AddPAIRegion all RegionGasBox PAIphoton
 
 #/random/setSeeds 0 0
 /run/initialize
