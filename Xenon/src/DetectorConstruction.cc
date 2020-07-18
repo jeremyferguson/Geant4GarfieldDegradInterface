@@ -29,7 +29,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     wallThickness(0.05*m), //thickness of the aluminum walls
     caloThickness(1.*mm), // thickness of the silicon detectors
     gasPressure(1.199*bar), // Pressure inside the gas
-    temperature(296*kelvin), // temperature
+    temperature(293.15*kelvin), // temperature
     MainGasPercentage(100.), // mixture settings
     SecondGasPercentage(0.),
     ImpurityGasPercentage(0.),
@@ -132,9 +132,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double MainRefractivity = GetMainRIndex();
   G4double MainRindex = sqrt(((-GetMainMolarMass()/(MainGasDensity/(g/L))) - 2 * MainRefractivity) / (MainRefractivity - (GetMainMolarMass()/(MainGasDensity/(g/L)))));
   G4double MainRindices[nEntriesMainIndex]={MainRindex, MainRindex};
-  
+  G4double MainAbsLength[nEntriesMainIndex] = {.0001137 * centimeter, .0001137 * centimeter}; 
   G4MaterialPropertiesTable* mptMain= new G4MaterialPropertiesTable();
   mptMain->AddProperty("RINDEX",photonEnergyMainIndex,MainRindices,nEntriesMainIndex);
+  mptMain->AddProperty("ABSLENGTH",photonEnergyMainIndex, MainAbsLength,nEntriesMainIndex);
   MainGas->SetMaterialPropertiesTable(mptMain);
   
   
@@ -145,8 +146,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double SecondRindex = sqrt(((-GetSecondMolarMass()/(SecondGasDensity/(g/L))) - 2 * SecondRefractivity) / (SecondRefractivity - (GetSecondMolarMass()/(SecondGasDensity/(g/L)))));
   G4double SecondRindices[nEntriesSecondIndex]={SecondRindex, SecondRindex};
   
+  G4double SecondAbsLength[nEntriesMainIndex] = {.0001137 * centimeter, .0001137 * centimeter}; 
   G4MaterialPropertiesTable* mptSecond= new G4MaterialPropertiesTable();
   mptSecond->AddProperty("RINDEX",photonEnergySecondIndex,SecondRindices,nEntriesSecondIndex);
+  mptSecond->AddProperty("ABSLENGTH",photonEnergySecondIndex, SecondAbsLength,nEntriesSecondIndex);
   SecondGas->SetMaterialPropertiesTable(mptSecond);
 
   const G4int nEntriesImpurityIndex = 2;
@@ -155,8 +158,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double ImpurityRefractivity = GetImpurityRIndex();
   G4double ImpurityRindex = sqrt(((-GetImpurityMolarMass()/(ImpurityGasDensity/(g/L))) - 2 * ImpurityRefractivity) / (ImpurityRefractivity - (GetImpurityMolarMass()/(ImpurityGasDensity/(g/L)))));
   G4double ImpurityRindices[nEntriesImpurityIndex]={ImpurityRindex, ImpurityRindex};
+  G4double ImpurityAbsLength[nEntriesMainIndex] = {.0001137 * centimeter, .0001137 * centimeter}; 
   G4MaterialPropertiesTable* mptImpurity = new G4MaterialPropertiesTable();
   mptImpurity->AddProperty("RINDEX",photonEnergyImpurityIndex, ImpurityRindices, nEntriesImpurityIndex);
+  mptImpurity->AddProperty("ABSLENGTH",photonEnergyImpurityIndex, ImpurityAbsLength,nEntriesImpurityIndex);
   ImpurityGas->SetMaterialPropertiesTable(mptImpurity);
 
   const G4int nEntriesThirdIndex = 2;

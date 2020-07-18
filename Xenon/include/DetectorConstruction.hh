@@ -107,7 +107,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline G4double GetSecondRIndex(){return gasRefractivityMap[secondGas];}
   inline G4double GetImpurityRIndex(){return gasRefractivityMap[impurityGas];} 
   inline G4double GetThirdRIndex(){return gasRefractivityMap[thirdGas];}
-  
+  inline G4double GetEnergyLevel(G4String gas) {return energyLevelsMap[gas];}  
  private:
   DetectorMessenger* detectorMessenger;
   G4LogicalVolume* logicGasBox;
@@ -137,7 +137,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 	  {"Ar",{"G4_Ar","2"}},
 	  {"O2",{"G4_lO2","15"}},
 	  {"iC4H10",{"G4_BUTANE","11"}},
-	  {"H2O",{"G4_WATER_VAPOR","14"}}
+	  {"H2O",{"G4_WATER_VAPOR","14"}},
+	  {"He",{"G4_He","3"}}
   };
   std::unordered_map <string, G4double> gasDensityMap = {
 	  {"Xe", 131.293},
@@ -146,15 +147,29 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 	  {"Ar",39.948},
 	  {"H2O",18.015},
 	  {"O2",15.999},
+	  {"He",4.002},
 	  {"iC4H10",58.12}
   };
   std::unordered_map <string, G4double> gasRefractivityMap = {
 	  {"Xe",0.10},
+	  {"He",0.10},
 	  {"Ar",0.104},
 	  {"CO2",0.158},
 	  {"CH4",0.397},
 	  {"H2O",3.7},
 	  {"O2",1.22}
+  };
+  std::unordered_map <string, G4double> energyLevelsMap = {
+	  {"Xe",7.0},
+	  {"He",24.6},
+	  {"CO2",2.0},
+	  {"H2O",2.0},
+	  {"Ar",9.7},
+	  {"CH4",2.0}
+  };
+  std::unordered_map <string, std::vector<G4double>> attenuationMap = {
+	{"Xe",{9410.0,2090.0,639.0,169.0,26.5,12.7,2.01,.376,.097}},
+	{"Ar",{3180.0,512.0,423.0,63.2,8.63,.701,.204,.12,.0796}}
   };
 };
 #endif

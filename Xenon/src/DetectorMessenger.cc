@@ -71,7 +71,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* HPGeDet)
         new G4UIcommand("/Xenon/geometry/SetSecondGas", this);
     setSecondGasCmd->SetGuidance("Set the second gas");
     G4UIparameter* secondGasName = new G4UIparameter("GasType", 's', false);
-    secondGasName->SetParameterCandidates("Xe Ar CO2 CH4");
+    secondGasName->SetParameterCandidates("Xe Ar CO2 CH4 He");
     setSecondGasCmd->SetParameter(secondGasName);
     
     setImpurityGasCmd = 
@@ -85,7 +85,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* HPGeDet)
         new G4UIcommand("/Xenon/geometry/SetThirdGas", this);
     setThirdGasCmd->SetGuidance("Set the third gas");
     G4UIparameter* thirdGasName = new G4UIparameter("GasType", 's', false);
-    thirdGasName->SetParameterCandidates("Xe Ar CO2 CH4");
+    thirdGasName->SetParameterCandidates("Xe Ar CO2 CH4 He");
     setThirdGasCmd->SetParameter(thirdGasName);
 }
 

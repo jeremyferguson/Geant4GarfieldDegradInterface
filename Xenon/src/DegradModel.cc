@@ -43,7 +43,8 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
 }
 
 void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
-
+    G4double celsius = -273.15;
+    const static G4double Torr = 1. / 760. * atmosphere;
     fastStep.KillPrimaryTrack();
     if(!processOccured){
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
@@ -69,12 +70,31 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
 	G4String ngas1 = detCon->GetMainDegradNumber();
 	G4String ngas2 = secPer != 0.0 ? secNum : thrPer != 0.0 ? thrNum : impPer == 0.0 ? "0" : impNum;
 	G4String ngas3 = ngas2 == "0" ? "0" : ngas2 == secNum ? thrPer != 0 ? thrNum : impPer == 0.0 ? "0" : impNum : ngas2 == thrNum ? impPer == 0.0 ? "0" : impNum : "0";
-	G4String ngas4 = ngas3 == "0" ? "0" : impNum;
+	G4String ngas4 = ngas3 == "0" ? "0" : ngas3 == impNum ? "0" : impPer == 0.0 ? "0" : impNum;
 	G4String percentage1 = std::to_string(detCon->GetMainGasPercentage());
         G4String percentage2 = std::to_string(ngas2 == "0" ? 0.0 : ngas2 == secNum ? secPer : ngas2 == thrNum ? thrPer : impPer);
 	G4String percentage3 = std::to_string(ngas3 == "0" ? 0.0 : ngas3 == thrNum ? thrPer : impPer);	
 	G4String percentage4 = std::to_string(ngas4 == "0" ? 0.0 : impPer);
-	G4String degradString="printf \""+ngasstr+",1,3,-1,"+seed+",5900.0,7.0,0.0\n"+ngas1+","+ngas2+","+ngas3+","+ngas4+",0,0\n"+ percentage1 +","+ percentage2 +","+percentage3+","+percentage4+",0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,2,0\n100.0,0.5,2,2,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+	array<double,2> gaspairs[4] = {{std::stod(ngas1),std::stod(percentage1)},{std::stod(ngas2),std::stod(percentage2)},{std::stod(ngas3),std::stod(percentage3)},{std::stod(ngas4),std::stod(percentage4)}};
+	sort(std::begin(gaspairs), std::end(gaspairs),std::greater<array<double, 2>>());
+	ngas1 = std::to_string(int(gaspairs[0][0]));
+	ngas2 = std::to_string(int(gaspairs[1][0]));
+	ngas3 = std::to_string(int(gaspairs[2][0]));
+	ngas4 = std::to_string(int(gaspairs[3][0]));
+	percentage1 = std::to_string(gaspairs[0][1]);
+	percentage2 = std::to_string(gaspairs[1][1]);
+	percentage3 = std::to_string(gaspairs[2][1]);
+	percentage4 = std::to_string(gaspairs[3][1]);
+	G4double eTherm = detCon->GetEnergyLevel(detCon->GetMainGas());
+	eTherm = secPer > 0.0 ? min(eTherm, detCon->GetEnergyLevel(detCon->GetSecondGas())) : eTherm;
+	eTherm = thrPer > 0.0 ? min(eTherm, detCon->GetEnergyLevel(detCon->GetThirdGas())) : eTherm;
+	eTherm = impPer > 0.0 ? min(eTherm, detCon->GetEnergyLevel(detCon->GetImpurityGas())) : eTherm;
+	G4String eThermStr = std::to_string(eTherm);
+	int decimal = eThermStr.find('.');
+	eThermStr = eThermStr.substr(0,decimal + 2);	
+	G4String pressure = std::to_string(round((detCon->GetGasPressure() /Torr)+0.5));
+	G4String temperature = std::to_string(round(detCon->GetTemperature() + celsius));
+	G4String degradString="printf \""+ngasstr+",1,3,-1,"+seed+",5900.0,"+eThermStr+",0.0\n"+ngas1+","+ngas2+","+ngas3+","+ngas4+",0,0\n"+ percentage1 +","+ percentage2 +","+percentage3+","+percentage4+",0.0,0.0,"+temperature+","+pressure+"\n3000.0,0.0,0.0,2,0\n100.0,0.5,2,2,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -159,7 +179,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
 		
 		G4VPhysicalVolume* myVolume = theNavigator->LocateGlobalPointAndSetup(myPoint);
 		
-		G4cout << (nline == 2 ? "Electron" : "Photon") << ":(" << posX << ", " << posY << ", " << posZ << ")" << G4endl;
+		//G4cout << (nline == 2 ? "Electron" : "Photon") << ":(" << posX << ", " << posY << ", " << posZ << ")" << G4endl;
 		if (myVolume == 0) {
 			continue;
 		}
