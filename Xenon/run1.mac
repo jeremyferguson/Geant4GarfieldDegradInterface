@@ -21,7 +21,7 @@
 /run/initialize
 
 #/param/InActivateModel DegradModel
-#/param/InActivateModel GarfieldVUVPhotonModel
+/param/InActivateModel GarfieldVUVPhotonModel
 
 /analysis/setFileName test
 

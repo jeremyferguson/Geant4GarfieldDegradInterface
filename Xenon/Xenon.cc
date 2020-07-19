@@ -65,12 +65,16 @@ int main(int argc, char** argv) {
 
   //runManager->Initialize();
 
-    //#ifdef G4UI_USE
-    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
-    //#ifdef G4VIS_USE
   if (argc == 1)  //! define UI terminal for interactive mode:
   {
     UImanager->ApplyCommand("/control/execute vis.mac");
+    //#endif
+    //#ifdef G4UI_USE
+    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
+    //#ifdef G4VIS_USE
+  //#ifdef G4VIS_USE
+    ui->SessionStart();
+    delete ui;
     //#endif
 
   } else  //! batch mode:
@@ -88,10 +92,6 @@ int main(int argc, char** argv) {
     double duration = difftime(time(0),start);
     cout << "Simulation Time: " << duration << endl;
   }
-  //#ifdef G4VIS_USE
-    ui->SessionStart();
-    delete ui;
-    //#endif
   delete visManager;
   //#endif
  
