@@ -7,7 +7,7 @@
 /Xenon/geometry/SetMainGasPercentage 88
 /Xenon/geometry/SetSecondGasPercentage 10
 /Xenon/geometry/SetThirdGasPercentage 2
-/Xenon/geometry/SetImpurityGasPercentage 0.0001
+/Xenon/geometry/SetImpurityGasPercentage 0
 /run/numberOfThreads 1
 /control/cout/ignoreThreadsExcept 0
 #/control/cout/setCoutFile output.dmp
