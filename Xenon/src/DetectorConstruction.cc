@@ -214,16 +214,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
 
-  gasboxR = 3.5*cm;
-  gasboxH = 25.*mm;
+  gasboxR = 35*cm;
+  gasboxH = 25*cm;
 
   G4double halfColimatorLength=0.2*cm;
-  G4double rIntColimator=1.0*mm;
-  G4double rIntColimator2=3.75*mm;
-  G4double rExtColimator=5.*cm;
+  G4double rIntColimator=1.0*cm;
+  G4double rIntColimator2=3.75*cm;
+  G4double rExtColimator=50.*cm;
   //detectorHalfZ=5*cm;
   G4double pmtHalfLength=0.5*cm;
-  G4double pmtRadius=2.4*cm;
+  G4double pmtRadius=24*cm;
   G4double distColimattorToDetector=2.5*cm;
   G4double macorHalfY=1.3*cm/2;
   G4double windowHalfLength=25.*um;
@@ -231,7 +231,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // geometries --------------------------------------------------------------
   // experimental hall (world volume)
   G4VSolid* worldSolid
-  = new G4Box("worldBox",5.*cm,4.*cm,5.*cm);
+  = new G4Box("worldBox",50.*cm,40.*cm,50.*cm);
   G4LogicalVolume* worldLogical  = new G4LogicalVolume(worldSolid,air,"worldLogical");
   physiWorld = new G4PVPlacement(0,G4ThreeVector(),worldLogical,"worldPhysical",0,
                       false,0,checkOverlaps);

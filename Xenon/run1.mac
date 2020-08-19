@@ -1,12 +1,12 @@
-/Xenon/geometry/SetGasPressure 1.199 bar
+/Xenon/geometry/SetGasPressure 4 bar
 /gasModelParameters/degrad/thermalenergy 10. eV
 /Xenon/geometry/SetMainGas Ar
-/Xenon/geometry/SetSecondGas CH4
+/Xenon/geometry/SetSecondGas He
 /Xenon/geometry/SetThirdGas CO2
 /Xenon/geometry/SetImpurityGas H2O
-/Xenon/geometry/SetMainGasPercentage 90
+/Xenon/geometry/SetMainGasPercentage 88
 /Xenon/geometry/SetSecondGasPercentage 10
-/Xenon/geometry/SetThirdGasPercentage 0
+/Xenon/geometry/SetThirdGasPercentage 2
 /Xenon/geometry/SetImpurityGasPercentage 0
 /run/numberOfThreads 1
 /control/cout/ignoreThreadsExcept 0
@@ -36,7 +36,7 @@
 ########### Visualization ##########
 ####################################
 
-/gps/position 0. -3.3 0. cm
+/gps/position 0. 0. 0. cm
 /gps/direction 0. 1. 0 
 /gps/particle gamma
 /gps/ene/type Mono

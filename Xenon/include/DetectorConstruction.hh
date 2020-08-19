@@ -74,7 +74,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline void SetMainGas(string s){mainGas = s;}
   inline void SetSecondGas(string s){secondGas = s;}
   inline void SetImpurityGas(string s){impurityGas = s;}
-  inline void SetThirdGas(string s){impurityGas = s;}
+  inline void SetThirdGas(string s){thirdGas = s;}
   //Getters for the dimensions and environment variables of the setup
   inline G4double GetWorldHalfLength(){return worldHalfLength;};
   inline G4double GetGasBoxR(){return gasboxR;};

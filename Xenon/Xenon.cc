@@ -63,20 +63,15 @@ int main(int argc, char** argv) {
   G4VisManager* visManager = new G4VisExecutive();
   visManager->Initialize();
 
+    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
   //runManager->Initialize();
 
   if (argc == 1)  //! define UI terminal for interactive mode:
   {
     UImanager->ApplyCommand("/control/execute vis.mac");
-    //#endif
-    //#ifdef G4UI_USE
-    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
-    //#ifdef G4VIS_USE
-  //#ifdef G4VIS_USE
+
     ui->SessionStart();
     delete ui;
-    //#endif
-
   } else  //! batch mode:
   {
     G4String command = "/control/execute ";
